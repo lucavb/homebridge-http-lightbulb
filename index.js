@@ -103,13 +103,8 @@ HTTPLightbulb.prototype.setState = function(status, callback) {
     } else {
         urlToUse = this.offUrl;
     }
-    request(
-        {
-            url : urlToUse,
-            headers : {
-                "Authorization" : this.auth
-            }
-        },
+    this.ledsStatus.on = status;
+    request( {  url : urlToUse, headers : { "Authorization" : this.auth }  } ,
         function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 callback();
@@ -121,10 +116,13 @@ HTTPLightbulb.prototype.setState = function(status, callback) {
 };
 
 HTTPLightbulb.prototype.getState = function(callback) {
+    var that = this;
     request(this.statusUrl, function (error, response, body) {
         if (body == 1) {
+            that.ledsStatus.on = true;
             callback(null, true);
         } else {
+            that.ledsStatus.on = false;
             callback(null, false);
         }
     });
@@ -140,9 +138,7 @@ HTTPLightbulb.prototype.setHue = function(level, callback) {
     this.ledsStatus.values[0] = level;
     if (this.ledsStatus.on) {
         var rgb = rgbConversion.hslToRgb(this.ledsStatus.values[0], this.ledsStatus.values[1], this.ledsStatus.values[2]);
-        console.log("writing " + rgb);
         request( { url : this.rgbSetUrl, headers : { "Authorization" : this.auth }, qs : rgb }, function (error, response, body) {
-            console.log("habe antwort erhalten");
             if (!error && response.statusCode == 200) {
                 //
             } else {
@@ -150,6 +146,8 @@ HTTPLightbulb.prototype.setHue = function(level, callback) {
             }
             callback();
         });
+    } else {
+        callback();
     }
 };
 
@@ -174,6 +172,8 @@ HTTPLightbulb.prototype.setSat = function(level, callback) {
             }
             callback();
         });
+    } else {
+        callback();
     }
 };
 
@@ -196,6 +196,8 @@ HTTPLightbulb.prototype.setBright = function(level, callback) {
             }
             callback();
         });
+    } else {
+        callback();
     }
 };
 
